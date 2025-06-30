@@ -1,57 +1,105 @@
 // server/index.js
-
-// Load environment variables from .env file
 require('dotenv').config();
 
-// Import necessary modules
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const axios = require('axios'); // NEW: Import axios for HTTP requests to Wolfram Alpha
-const xml2js = require('xml2js'); // NEW: For parsing Wolfram Alpha XML response
-const parser = new xml2js.Parser(); // NEW: Initialize the XML parser
+const axios = require('axios'); 
+const xml2js = require('xml2js'); 
+const parser = new xml2js.Parser(); 
 
-// Initialize Express app
 const app = express();
-const port = process.env.PORT || 5000; // Use port from .env or default to 5000
+const port = process.env.PORT || 5000; 
 
-// Middleware
-app.use(cors()); // Enables CORS for all origins, allowing frontend to access
-app.use(express.json()); // Parses incoming requests with JSON payloads
+app.use(cors());  
+app.use(express.json()); 
 
-// Initialize Google Gemini API
-// IMPORTANT: Ensure GEMINI_API_KEY is correctly set in your .env file
 if (!process.env.GEMINI_API_KEY) {
     console.error('Error: GEMINI_API_KEY is not set in .env file!');
     console.error('Please add GEMINI_API_KEY=YOUR_API_KEY_HERE to your .env file in the server directory.');
-    process.exit(1); // Exit the process if the API key is missing
+    process.exit(1);
 }
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Get the generative model instance once
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-// NEW: Store chat history for context (simple in-memory for this example)
-// In a real application, this would be per-user and persistent (e.g., in a database)
-const chatHistory = []; 
-
-// IMPORTANT: Ensure WOLFRAM_ALPHA_APP_ID is correctly set in your .env file
 if (!process.env.WOLFRAM_ALPHA_APP_ID) {
     console.error('Error: WOLFRAM_ALPHA_APP_ID is not set in .env file!');
     console.error('Please add WOLFRAM_ALPHA_APP_ID=YOUR_APP_ID_HERE to your .env file in the server directory.');
-    process.exit(1); // Exit the process if the API key is missing
+    process.exit(1); 
 }
 const WOLFRAM_ALPHA_APP_ID = process.env.WOLFRAM_ALPHA_APP_ID;
 
+if (!process.env.YOUTUBE_API_KEY_FOR_SERVER_SIDE) {
+    console.error('Error: YOUTUBE_API_KEY_FOR_SERVER_SIDE is not set in .env file!');
+    console.error('Please add YOUTUBE_API_KEY_FOR_SERVER_SIDE=YOUR_API_KEY_HERE to your .env file in the server directory.');
+    process.exit(1); 
+}
+const YOUTUBE_API_KEY_SERVER = process.env.YOUTUBE_API_KEY_FOR_SERVER_SIDE;
 
-// --- API Routes ---
+const chatHistory = [];
 
-// 1. Root/Test Route
+
+// --- apis ---
+
+// 1. Root route
 app.get('/', (req, res) => {
     res.send('E-Learning Backend API is running!');
 });
 
-// 2. AI Flashcard Generator API
+// 2. Endpoint to fetch youtube
+app.get('/api/youtube-video-details/:videoId', async (req, res) => {
+    const { videoId } = req.params;
+
+    try {
+        const response = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+            params: {
+                key: YOUTUBE_API_KEY_SERVER, 
+                part: 'snippet,statistics',
+                id: videoId,
+            },
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error("Error fetching video details on backend:", error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({
+            error: 'Failed to fetch video details from YouTube API',
+            details: error.response?.data || error.message
+        });
+    }
+});
+
+// 3. Endpoint to search youtube videos
+app.get('/api/search-youtube-videos', async (req, res) => {
+    const { q, maxResults = 12, order = 'relevance', videoDuration = 'long' } = req.query;
+
+    if (!q) {
+        return res.status(400).json({ error: 'Search query (q) is required.' });
+    }
+
+    try {
+        const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+            params: {
+                key: YOUTUBE_API_KEY_SERVER, 
+                part: 'snippet',
+                q: q,
+                type: 'video',
+                maxResults: maxResults,
+                order: order,
+                videoDuration: videoDuration,
+            },
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error("Error searching YouTube videos on backend:", error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({
+            error: 'Failed to search YouTube videos from YouTube API',
+            details: error.response?.data || error.message
+        });
+    }
+});
+
+
+// 4. ai flashcard generator api
 app.post('/api/generate-flashcards', async (req, res) => {
     const { text } = req.body;
 
@@ -89,7 +137,7 @@ app.post('/api/generate-flashcards', async (req, res) => {
                 flashcards = JSON.parse(cleanedJsonString);
                 if (!Array.isArray(flashcards) || flashcards.some(card => !card.question || !card.answer)) {
                     console.warn("Parsed JSON is not a valid flashcard array, attempting simpler parse:", flashcards);
-                    flashcards = JSON.parse(textContent); // Fallback
+                    flashcards = JSON.parse(textContent); 
                 }
             } else {
                 console.warn("No valid JSON array found by regex in Gemini response (Flashcards). Trying full parse as fallback.");
@@ -111,7 +159,7 @@ app.post('/api/generate-flashcards', async (req, res) => {
     }
 });
 
-// 3. AI Book Summarizer API
+// 5. ai book summarizer api
 app.post('/api/summarize', async (req, res) => {
     const { textToSummarize } = req.body;
 
@@ -142,7 +190,7 @@ app.post('/api/summarize', async (req, res) => {
     }
 });
 
-// 4. AI Research Paper Summarizer API
+// 6. ai research paper summarizer api
 app.post('/api/summarize-research-paper', async (req, res) => {
     const { textToSummarize } = req.body;
 
@@ -176,9 +224,8 @@ app.post('/api/summarize-research-paper', async (req, res) => {
     }
 });
 
-// 5. AI Career Recommendation System API
+// 7. ai career recommendation system api
 app.post('/api/career-recommendation', async (req, res) => {
-    // Now expecting a single 'userInput' field
     const { userInput } = req.body;
 
     if (!userInput || typeof userInput !== 'string' || userInput.trim() === '') {
@@ -186,13 +233,12 @@ app.post('/api/career-recommendation', async (req, res) => {
     }
 
     try {
-        // Updated prompt to infer interests and provide comprehensive recommendation
         const prompt = `Given the following skills, technologies, and keywords, first infer potential career interests, then provide a comprehensive career recommendation.
         Include a recommended career path, essential skill sets, technologies to learn, learning resources, job market insights (general trends), and an action plan.
         Structure your response clearly with headings, bullet points, and actionable advice.
 
         Here's the desired structure (use similar headings for clarity, but be concise and informative):
-        
+
         **I. Inferred Interests**
         Based on the provided input, what specific career areas or roles might the user be interested in?
 
@@ -215,7 +261,7 @@ app.post('/api/career-recommendation', async (req, res) => {
         Step-by-step guidance on how to get started (e.g., build portfolio, networking, internships).
 
         ---
-        
+
         User Input (Skills/Keywords): "${userInput}"`;
 
         console.log("Sending prompt to Gemini (Career Recommendation)...");
@@ -236,15 +282,14 @@ app.post('/api/career-recommendation', async (req, res) => {
     }
 });
 
-// 6. AI MCQ Generator API (NEW ROUTE)
+// 8. ai mcq generator api 
 app.post('/api/generate-mcqs', async (req, res) => {
-    const { text, numQuestions = 5 } = req.body; // Default to 5 questions if not specified
+    const { text, numQuestions = 5 } = req.body; 
 
     if (!text || typeof text !== 'string' || text.trim() === '') {
         return res.status(400).json({ error: 'Please provide valid text to generate MCQs.' });
     }
 
-    // You can add validation for numQuestions if needed, e.g., max limit
     if (isNaN(numQuestions) || numQuestions < 1 || numQuestions > 10) {
         return res.status(400).json({ error: 'Number of questions must be between 1 and 10.' });
     }
@@ -278,21 +323,19 @@ app.post('/api/generate-mcqs', async (req, res) => {
         console.log("Sending prompt to Gemini (MCQ Generator)...");
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        const textContent = response.text(); // Gemini's response will be the JSON string
+        const textContent = response.text(); 
 
         console.log("Received response from Gemini (MCQ Generator raw):", textContent);
 
         let mcqs = [];
         try {
-            // Attempt to extract JSON from the response text, in case Gemini adds conversational filler
             const jsonMatch = textContent.match(/\[\s*{[^}]*}(?:,\s*{[^}]*})*\s*\]/s);
 
             if (jsonMatch && jsonMatch[0]) {
                 mcqs = JSON.parse(jsonMatch[0]);
-                // Basic validation for parsed MCQs
                 if (!Array.isArray(mcqs) || mcqs.some(q => !q.question || !Array.isArray(q.options) || q.options.length !== 4 || !q.answer)) {
                    console.warn("Parsed JSON is not a valid MCQ array, attempting full parse as fallback:", mcqs);
-                   mcqs = JSON.parse(textContent); // Fallback to raw parse
+                   mcqs = JSON.parse(textContent); 
                 }
             } else {
                 console.warn("No valid JSON array found by regex in Gemini response (MCQ). Trying full parse as fallback.");
@@ -303,7 +346,6 @@ app.post('/api/generate-mcqs', async (req, res) => {
             mcqs = [{ question: "Error generating MCQs", options: [], answer: "Could not parse AI response. Try different text." }];
         }
 
-        // Ensure we return the requested number of questions if possible
         if (mcqs.length > numQuestions) {
             mcqs = mcqs.slice(0, numQuestions);
         } else if (mcqs.length < numQuestions) {
@@ -321,7 +363,7 @@ app.post('/api/generate-mcqs', async (req, res) => {
     }
 });
 
-// 7. AI Homework Helper API (NEW/UPDATED ROUTE with Wolfram Alpha Full Results & Gemini)
+// 9. ai homework hlper api
 app.post('/api/homework-helper', async (req, res) => {
     const { problem } = req.body;
 
@@ -333,34 +375,26 @@ app.post('/api/homework-helper', async (req, res) => {
         let wolframAlphaResultText = '';
         let wolframAlphaSteps = null;
 
-        // Step 1: Query Wolfram Alpha Full Results API for detailed answer and steps
         const encodedProblem = encodeURIComponent(problem);
-        // Use the v2/query endpoint with 'podstate' to try and get step-by-step solutions
-        // 'podstate=Result__Step-by-step solution' attempts to expand that pod
-        // 'format=plaintext' for simpler text extraction, or 'output=json' if you prefer JSON (but default is XML)
         const wolframAlphaUrl = `http://api.wolframalpha.com/v2/query?input=${encodedProblem}&appid=${WOLFRAM_ALPHA_APP_ID}&output=xml&podstate=Result__Step-by-step solution&format=plaintext`; // Request plaintext for simpler parsing
 
         console.log("Querying Wolfram Alpha Full Results API:", wolframAlphaUrl);
         try {
-            const wolframResponse = await axios.get(wolframAlphaUrl, { timeout: 15000 }); // Increase timeout for complex queries
+            const wolframResponse = await axios.get(wolframAlphaUrl, { timeout: 15000 }); 
             const xmlResponse = wolframResponse.data;
             console.log("Wolfram Alpha Raw XML Response:", xmlResponse);
 
-            // Parse the XML response
             const resultObj = await parser.parseStringPromise(xmlResponse);
             console.log("Wolfram Alpha Parsed Object:", JSON.stringify(resultObj, null, 2));
 
             const queryResult = resultObj.queryresult;
 
             if (queryResult && queryResult.pod) {
-                // Extract main result
                 const resultPod = queryResult.pod.find(p => p.$.title === 'Result' || p.$.title === 'Solutions' || p.$.title === 'Value');
                 if (resultPod && resultPod.subpod && resultPod.subpod[0] && resultPod.subpod[0].plaintext) {
                     wolframAlphaResultText = resultPod.subpod[0].plaintext[0];
                 }
 
-                // Extract step-by-step solution
-                // Wolfram Alpha sometimes names this pod "Solution" or "Step-by-step solution"
                 const stepByStepPod = queryResult.pod.find(p => p.$.title === 'Step-by-step solution' || p.$.title === 'Solution');
                 if (stepByStepPod && stepByStepPod.subpod) {
                     wolframAlphaSteps = stepByStepPod.subpod.map(sp => sp.plaintext[0]).join('\n');
@@ -374,14 +408,10 @@ app.post('/api/homework-helper', async (req, res) => {
         } catch (waError) {
             console.error("Error querying Wolfram Alpha Full Results API or parsing response:", waError.message);
             wolframAlphaResultText = "Failed to get detailed answer from Wolfram Alpha. Gemini will attempt to solve and explain.";
-            // If XML parsing fails, the previous error handling would just give the raw error,
-            // so we set a user-friendly message.
         }
 
-        // Step 2: Use Gemini to generate a step-by-step explanation, incorporating Wolfram Alpha's findings
         let prompt;
         if (wolframAlphaSteps) {
-            // If Wolfram Alpha provided steps, use them
             prompt = `You are an AI Homework Helper. Here is a problem and its step-by-step solution from a reliable computational engine. Please present this solution clearly and pedagogically for a student. Explain each step in an easy-to-understand manner. Format the steps using clear numbering or bullet points.
 
             Problem: "${problem}"
@@ -392,7 +422,6 @@ app.post('/api/homework-helper', async (req, res) => {
             ---
             Your explanation:`;
         } else if (wolframAlphaResultText && !wolframAlphaResultText.includes("Wolfram Alpha could not find")) {
-            // If Wolfram Alpha only provided a result, ask Gemini to explain how to get there
             prompt = `You are an AI Homework Helper. Here is a problem and its direct answer from a reliable computational engine. Please provide a detailed, step-by-step explanation for how to arrive at this answer. Format the steps using clear numbering or bullet points.
 
             Problem: "${problem}"
@@ -401,7 +430,6 @@ app.post('/api/homework-helper', async (req, res) => {
             ---
             Your step-by-step explanation:`;
         } else {
-            // Fallback: Wolfram Alpha failed or didn't find steps/answer, so Gemini solves from scratch
             prompt = `You are an AI Homework Helper. Please provide a detailed, step-by-step explanation for the following problem. Attempt to solve it yourself and explain each step clearly. Format the steps using clear numbering or bullet points.
 
             Problem: "${problem}"
@@ -422,14 +450,14 @@ app.post('/api/homework-helper', async (req, res) => {
 
     } catch (error) {
         console.error('Error in AI Homework Helper API (overall process):', error);
-        if (error.response) { // Check for Gemini API specific error details
+        if (error.response) { 
             console.error('Gemini API error details (Homework Helper):', error.response.status, error.response.statusText, await error.response.text());
         }
         res.status(500).json({ error: 'Failed to provide homework help. Please try again later.' });
     }
 });
 
-// 8. Contact Form Submission API
+// 10. contact form Submission api
 app.post('/api/contact', (req, res) => {
     const { name, email, subject, message } = req.body;
 
@@ -447,7 +475,7 @@ app.post('/api/contact', (req, res) => {
     res.status(200).json({ message: 'Message received successfully! We will get back to you shortly.' });
 });
 
-// NEW: 9. AI Chat Endpoint for CourseDetail page
+// 11. ai Chat endpoint for coursedetail page
 app.post('/ask-ai', async (req, res) => {
     const { question } = req.body;
 
@@ -456,26 +484,23 @@ app.post('/ask-ai', async (req, res) => {
     }
 
     try {
-        // Start a chat session with the model, providing past history
         const chat = model.startChat({
             history: chatHistory.map(entry => ({
                 role: entry.role,
                 parts: entry.parts
-            })), // Map simple history to Gemini's expected format
+            })), 
             generationConfig: {
-                maxOutputTokens: 120, // <--- UPDATED: Increased for more complete, concise answers
+                maxOutputTokens: 120, 
                 temperature: 0.5,
             },
         });
 
-        // Send the user's question to the AI model
         const result = await chat.sendMessage(
             `Please provide a very concise and direct answer to the following question. Ensure the answer is complete and stands on its own, suitable for a quick reference during a class.
             Question: "${question}"`
         );
         const responseText = await result.response.text();
 
-        // Add to chat history (for future context)
         chatHistory.push({ role: "user", parts: [{ text: question }] });
         chatHistory.push({ role: "model", parts: [{ text: responseText }] });
 
@@ -483,7 +508,6 @@ app.post('/ask-ai', async (req, res) => {
 
     } catch (error) {
         console.error("Error asking AI:", error);
-        // Log more details about the error if it's an Axios error (from Gemini API call)
         if (error.response) {
             console.error('Gemini API error details (ask-ai):', error.response.status, error.response.statusText, error.response.data);
         }
@@ -492,7 +516,6 @@ app.post('/ask-ai', async (req, res) => {
 });
 
 
-// --- Start the server ---
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
