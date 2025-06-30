@@ -1,0 +1,62 @@
+/* client/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.glow-on-hover {
+  position: relative; /* Needed for pseudo-elements positioning */
+  display: inline-block; /* Allows width/height for pseudo-elements based on content */
+  color: white; /* Ensure text color is visible */
+  transition: text-shadow 0.3s ease-out; /* Smooth transition for the text glow */
+  overflow: hidden; /* Ensures lines start/end outside and don't affect layout */
+  z-index: 1; /* Ensure text is above pseudo-elements if needed */
+}
+
+/* Initial state of the lines (hidden) */
+.glow-on-hover::before,
+.glow-on-hover::after {
+  content: '';
+  position: absolute;
+  background: linear-gradient(to right, transparent, #00FFFF, transparent); /* Cyan glowing line */
+  opacity: 0; /* Initially invisible */
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Smooth transition for lines */
+  width: 100%; /* Line covers the width of the text */
+  height: 2px; /* Thickness of the line */
+}
+
+/* Top line specific positioning */
+.glow-on-hover::before {
+  top: 0;
+  left: 0;
+  transform: translateY(-100%); /* Start above the text */
+}
+
+/* Bottom line specific positioning */
+.glow-on-hover::after {
+  bottom: 0;
+  left: 0;
+  transform: translateY(100%); /* Start below the text */
+}
+
+/* Hover effects */
+.glow-on-hover:hover {
+  /* Text glow effect */
+  text-shadow: 0 0 10px #ffffff, /* white base glow */
+               0 0 20px #00FFFF, /* cyan glow layers */
+               0 0 30px #00FFFF,
+               0 0 40px #00FFFF,
+               0 0 70px #00FFFF,
+               0 0 80px #00FFFF,
+               0 0 100px #00FFFF,
+               0 0 150px #00FFFF;
+}
+
+/* Lines appear and slide into position on hover */
+.glow-on-hover:hover::before {
+  opacity: 1;
+  transform: translateY(0%); /* Slide into view */
+}
+
+.glow-on-hover:hover::after {
+  opacity: 1;
+  transform: translateY(0%); /* Slide into view */
+}
