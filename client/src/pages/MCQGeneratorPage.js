@@ -74,10 +74,10 @@ function MCQGeneratorPage() {
     if (!showResults) return '';
 
     if (option === correctOption) {
-      return 'bg-green-100 text-green-800 border-green-500 font-semibold'; // Darker green text
+      return 'bg-green-100 text-green-800 border-green-500 font-semibold'; 
     }
     if (option === userSelected && option !== correctOption) {
-      return 'bg-red-100 text-red-800 border-red-500 font-semibold'; // Darker red text
+      return 'bg-red-100 text-red-800 border-red-500 font-semibold'; 
     }
     return '';
   };
@@ -167,7 +167,7 @@ function MCQGeneratorPage() {
               <p className="text-xl font-bold text-gray-900 mb-5">
                 {qIndex + 1}. {mcq.question}
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5"> {/* Increased gap */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5"> 
                 {mcq.options.map((option, oIndex) => (
                   <label
                     key={oIndex}
@@ -184,14 +184,14 @@ function MCQGeneratorPage() {
                       checked={selectedAnswers[qIndex] === option}
                       onChange={() => handleOptionChange(qIndex, option)}
                       disabled={showResults}
-                      className="mr-3 h-5 w-5 text-purple-600 focus:ring-purple-500" // Larger radio, purple accent
+                      className="mr-3 h-5 w-5 text-purple-600 focus:ring-purple-500" 
                     />
-                    <span className="text-gray-800 text-lg">{option}</span> {/* Larger option text */}
+                    <span className="text-gray-800 text-lg">{option}</span> 
                   </label>
                 ))}
               </div>
               {showResults && (
-                <p className="mt-6 text-lg font-medium"> {/* Larger result text */}
+                <p className="mt-6 text-lg font-medium"> 
                   Your Answer: <span className={selectedAnswers[qIndex] === mcq.answer ? 'text-green-700 font-bold' : 'text-red-700 font-bold'}>
                     {selectedAnswers[qIndex] || 'Not answered'}
                   </span>

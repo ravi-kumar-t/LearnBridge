@@ -12,7 +12,7 @@ function ResearchPaperSummarizerPage() {
 
   const handleSummarize = async () => {
     if (inputText.trim() === '') {
-      setError('Please enter text to summarize.'); // Added client-side validation
+      setError('Please enter text to summarize.'); 
       return;
     }
 
@@ -77,7 +77,6 @@ function ResearchPaperSummarizerPage() {
 
         <div className="flex justify-center mb-6">
           <button
-            // Darker teal, increased padding, strong focus, better disabled state
             className={`
               bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-3 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100
             `}

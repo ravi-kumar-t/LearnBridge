@@ -7,12 +7,10 @@ function About() {
 
   return (
     <div className="about-page bg-gray-50 pt-20">
-      {/*about us - Banner with Footer's Gradient and NEW Dark Top Overlay */}
       <section className="relative bg-gradient-to-r from-blue-500 to-indigo-700 text-white py-12 md:py-16 overflow-hidden">
-        {/* NEW: Dark gradient overlay from top, similar to Home page hero */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 to-transparent"></div> {/* z-10 for the overlay */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 to-transparent"></div> 
 
-        <div className="container mx-auto px-4 text-center relative z-20"> {/* z-20 for content to be on top of overlay */}
+        <div className="container mx-auto px-4 text-center relative z-20"> 
           <p className="text-sm md:text-base font-semibold uppercase tracking-wider mb-2 opacity-80">Our Story</p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
             Connecting Minds, Shaping Futures
@@ -36,8 +34,7 @@ function About() {
             </button>
           </div>
         </div>
-        {/* Decorative SVGs - ensure they are behind the new overlay if desired */}
-        <div className="absolute top-0 left-0 w-full h-full z-0"> {/* z-0 for SVGs to be behind everything else */}
+        <div className="absolute top-0 left-0 w-full h-full z-0"> 
             <svg className="absolute opacity-10" width="100%" height="100%" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0 64L48 80C96 96 192 128 288 128C384 128 480 96 576 96C672 96 768 128 864 128C960 128 1056 96 1152 80C1248 64 1344 48 1392 40L1440 32L1440 0L1392 0C1344 0 1248 0 1152 0C1056 0 960 0 864 0C768 0 672 0 576 0C480 0 384 0 288 0C192 0 96 0 48 0L0 0Z" fill="currentColor"></path>
             </svg>
@@ -47,7 +44,6 @@ function About() {
         </div>
       </section>
 
-      {/* The rest of your About page sections remain unchanged */}
       <section className="py-12 md:py-16 bg-white relative">
         <div className="absolute inset-0 bg-gray-100 opacity-50 -skew-y-3"></div>
         <div className="container mx-auto px-4 relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

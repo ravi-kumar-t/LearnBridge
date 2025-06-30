@@ -14,8 +14,6 @@ function FeatureSlide({ imageSrc, title, description }) {
         alt={title}
         className="w-32 h-32 object-contain mb-4 mx-auto"
       />
-
-      {}
               <h3 className="text-xl font-bold text-blue-600 mb-2">{title}</h3>
 
       {}

@@ -9,8 +9,7 @@ function Flashcard({ title, description, iconSrc }) {
           <img
             src={iconSrc}
             alt={`${title} icon`}
-            // REMOVED: filter brightness-0 invert
-            className="h-10 w-10 md:h-12 md:w-12 object-contain" // Icons will now show in their original colors
+            className="h-10 w-10 md:h-12 md:w-12 object-contain" 
           />
         </div>
       )}

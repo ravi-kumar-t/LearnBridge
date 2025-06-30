@@ -133,9 +133,8 @@ function ExploreDashboard() {
       </aside>
 
       <div className="flex-1 p-8 pt-8 ml-0 md:ml-56">
-        {/* Main Heading and Subheading - More Professional Colors */}
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Browse All Templates</h1> {/* Darker, bolder */}
-        <p className="text-lg text-gray-600 mb-6">What would you like to create today?</p> {/* Slightly darker gray */}
+        <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Browse All Templates</h1> 
+        <p className="text-lg text-gray-600 mb-6">What would you like to create today?</p> 
 
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-2">Search</h2>
@@ -152,7 +151,6 @@ function ExploreDashboard() {
         </div>
 
         {(selectedCategory !== 'All' || searchTerm) && (
-          // Filter Display - More Vibrant and Professional
           <div className="flex items-center justify-between bg-indigo-50 p-3 rounded-lg mb-6 border border-indigo-200 text-indigo-800 shadow-sm">
             <p className="text-sm font-medium">
               {selectedCategory !== 'All' && <span className="font-semibold">Category:</span>} {selectedCategory !== 'All' && selectedCategory}
@@ -169,9 +167,9 @@ function ExploreDashboard() {
           </div>
         )}
 
-        <hr className="my-8 border-gray-200" /> {/* Lighter border for separation */}
+        <hr className="my-8 border-gray-200" /> 
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"> {/* Increased gap, adjusted columns for better flow */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"> 
           {filteredTools.length > 0 ? (
             filteredTools.map((tool) => (
               <Link

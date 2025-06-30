@@ -42,12 +42,11 @@ function CareerRecommendationPage() {
       const fullRecommendation = data.recommendation;
 
       const sections = {};
-      // Updated regex to handle Roman numerals and potential extra spaces
       const sectionRegex = /\*\*(I|II|III|IV|V|VI|VII)\.\s*(.*?)\*\*\s*([\s\S]*?)(?=(?:\*\*(?:I|II|III|IV|V|VI|VII)\.\s*.*?\*|\s*$))/g;
       let match;
 
       while ((match = sectionRegex.exec(fullRecommendation)) !== null) {
-        const sectionHeading = `**${match[1]}. ${match[2].trim()}**`; // Trim heading title
+        const sectionHeading = `**${match[1]}. ${match[2].trim()}**`;
         const sectionContent = match[3].trim();
         sections[sectionHeading] = sectionContent;
       }

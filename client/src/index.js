@@ -1,12 +1,11 @@
 // client/src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css'; // Your global CSS
+import './index.css';
 import App from './App';
-import { ClerkProvider } from '@clerk/clerk-react'; // Import ClerkProvider
-import { BrowserRouter } from 'react-router-dom'; // <-- NEW: Import BrowserRouter
+import { ClerkProvider } from '@clerk/clerk-react';
+import { BrowserRouter } from 'react-router-dom';
 
-// Get the Clerk Publishable Key from your environment variables
 const PUBLISHABLE_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {

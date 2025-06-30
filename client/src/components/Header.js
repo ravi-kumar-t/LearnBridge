@@ -1,5 +1,5 @@
 // client/src/components/Header.js
-import React, { useState, useEffect } from 'react'; // Import useState and useEffect
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
@@ -9,8 +9,6 @@ function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
-      // You can adjust this '50' value. It's the scroll threshold in pixels
-      // after which the header will change its appearance.
       if (offset > 50) {
         setScrolled(true);
       } else {
@@ -18,16 +16,13 @@ function Header() {
       }
     };
 
-    // Add the scroll event listener when the component mounts
     window.addEventListener('scroll', handleScroll);
 
-    // Clean up the event listener when the component unmounts to prevent memory leaks
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []); // Empty dependency array means this effect runs once on mount and cleans up on unmount
+  }, []); 
 
-  // Define the dynamic classes for the inner header container
   const headerContainerClasses = `
     container mx-auto px-4 py-4
     flex justify-between items-center
@@ -35,21 +30,19 @@ function Header() {
     rounded-2xl                        /* Makes the header rounded on all corners */
     my-4                              /* Adds margin top/bottom to make it "float" */
     ${scrolled
-      ? 'bg-white bg-opacity-80 backdrop-blur-md shadow-lg' // Scrolled state: semi-transparent, blurred, larger shadow
-      : 'bg-white shadow-md'                                 // Initial state: opaque white, smaller shadow
+      ? 'bg-white bg-opacity-80 backdrop-blur-md shadow-lg' 
+      : 'bg-white shadow-md'                                 
     }
   `;
 
   return (
-    // The outer nav acts as a fixed full-width container for the header content
-    <nav className="fixed w-full z-50 top-0"> {/* z-50 ensures it's on top of other content */}
+    <nav className="fixed w-full z-50 top-0"> 
       <div className={headerContainerClasses}>
-        <Link to="/" className="flex items-center space-x-2"> {/* Added flex and space-x-2 to align logo and text */}
-          {/* ADDED: Logo image */}
+        <Link to="/" className="flex items-center space-x-2"> 
           <img
-            src="/images/learnbridge-logo.png" // Replace with your actual logo path
+            src="/images/learnbridge-logo.png"
             alt="LearnBridge Logo"
-            className="h-8 w-auto" // Adjust height (h-8 means 2rem or 32px) as needed
+            className="h-8 w-auto"
           />
           <span className="text-2xl font-bold text-blue-600">
             LearnBridge

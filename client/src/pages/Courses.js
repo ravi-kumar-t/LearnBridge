@@ -1,20 +1,20 @@
 // client/src/pages/Courses.js
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import CategoryTile from '../components/CategoryTile'; // Make sure this is the updated one from Step 1
+import CategoryTile from '../components/CategoryTile';
 import CourseCard from '../components/CourseCard';
 
 function Courses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentQuery, setCurrentQuery] = useState("Python programming tutorial"); // Initial query
+  const [currentQuery, setCurrentQuery] = useState("Python programming tutorial"); 
   const [searchInput, setSearchInput] = useState("");
 
   const coursesSectionRef = useRef(null);
 
   const fetchYouTubeVideos = async (query) => {
-    setCurrentQuery(query); // Update current query state
+    setCurrentQuery(query); 
     setLoading(true);
     setError(null);
     try {
@@ -23,7 +23,7 @@ function Courses() {
           q: query,
           maxResults: 12,
           order: 'relevance',
-          videoDuration: 'long', // Ensure we get longer content
+          videoDuration: 'long', 
         },
       });
 
@@ -33,10 +33,9 @@ function Courses() {
         title: item.snippet.title,
         description: item.snippet.description,
         instructor: item.snippet.channelTitle,
-        rating: 'N/A', // YouTube API doesn't provide this directly
-        reviews: 'N/A', // YouTube API doesn't provide this directly
+        rating: 'N/A', 
+        reviews: 'N/A', 
         price: 'Free',
-        // FIX: Correct YouTube link format for external viewing
         courseLink: `https://www.youtube.com/watch?v=${item.id.videoId}`,
       }));
 
@@ -57,7 +56,6 @@ function Courses() {
   const handleSearch = () => {
     if (searchInput.trim()) {
       fetchYouTubeVideos(searchInput.trim());
-      // Scroll to courses section after search
       setTimeout(() => {
         if (coursesSectionRef.current) {
           coursesSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -68,7 +66,6 @@ function Courses() {
 
   const handleCategoryClick = (query) => {
     fetchYouTubeVideos(query);
-    // Scroll to courses section after category click
     setTimeout(() => {
       if (coursesSectionRef.current) {
         coursesSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -76,19 +73,15 @@ function Courses() {
     }, 100);
   };
 
-  // Initial fetch when component mounts
   useEffect(() => {
     fetchYouTubeVideos(currentQuery);
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   return (
     <div className="py-8 pt-20">
-      {/* ENHANCED SEARCH BAR SECTION START - ADDED DARK TOP GRADIENT */}
       <section className="bg-gradient-to-br from-blue-600 to-indigo-700 py-20 md:py-28 text-white relative overflow-hidden">
-        {/* NEW: Dark gradient overlay from top */}
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 to-transparent"></div>
 
-        {/* Subtle background pattern/texture overlay - Ensure it's behind the dark gradient */}
         <div className="absolute inset-0 opacity-10 z-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0 20v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 46v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6-20v-4H4v4H0v2h4v4h2v-4h4v-2H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div> {/* Added z-0 */}
 
         <div className="container mx-auto px-4 text-center relative z-20"> {/* z-20 for content */}
@@ -120,14 +113,12 @@ function Courses() {
           </div>
         </div>
       </section>
-      {/* ENHANCED SEARCH BAR SECTION END */}
 
       <section className="bg-gray-100 py-16">
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-2xl font-semibold text-blue-600 mb-2">Categories</h3>
           <h2 className="text-4xl font-bold text-gray-900 mb-12">Popular Courses to explore</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {/* These now correctly use the onClick prop to trigger handleCategoryClick */}
             <CategoryTile imageSrc="/images/python-icon.png" title="Python" onClick={() => handleCategoryClick("Python programming tutorial")} />
             <CategoryTile imageSrc="/images/javascript-icon.png" title="JavaScript" onClick={() => handleCategoryClick("JavaScript full course")} />
             <CategoryTile imageSrc="/images/java-icon.png" title="Java" onClick={() => handleCategoryClick("Java comprehensive tutorial")} />
@@ -145,7 +136,6 @@ function Courses() {
         </div>
       </section>
 
-      {/* Courses Section: Attach the ref */}
       <section ref={coursesSectionRef} className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h3 className="text-2xl font-semibold text-blue-600 mb-2">Courses</h3>
